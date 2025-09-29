@@ -1,56 +1,51 @@
 name: CI/CD Pipeline
 
 on:
-push:
-branches: [ "main" ]
-pull_request:
-branches: [ "main" ]
-workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-build:
-runs-on: ubuntu-latest
-steps:
-- uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-```
-  - name: Install dependencies
-    run: |
-      echo "Installing project dependencies..."
-      # Example for Node.js
-      sudo apt-get update
-      sudo apt-get install -y nodejs npm
-      npm install
+      - name: Install dependencies
+        run: |
+          echo "Installing project dependencies..."
+          # Example for Node.js
+          sudo apt-get update
+          sudo apt-get install -y nodejs npm
+          npm install
 
-  - name: Run build
-    run: |
-      echo "Building the project..."
-      npm run build
-```
+      - name: Run build
+        run: |
+          echo "Building the project..."
+          npm run build
 
-test:
-runs-on: ubuntu-latest
-needs: build
-steps:
-- uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
 
-```
-  - name: Run tests
-    run: |
-      echo "Running project tests..."
-      npm test
-```
+      - name: Run tests
+        run: |
+          echo "Running project tests..."
+          npm test
 
-deploy:
-runs-on: ubuntu-latest
-needs: test
-steps:
-- uses: actions/checkout@v4
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
 
-```
-  - name: Deploy application
-    run: |
-      echo "Deploying application..."
-      # Add deployment commands here
-      echo "Deployment completed successfully!"
-```
+      - name: Deploy application
+        run: |
+          echo "Deploying application..."
+          # Add deployment commands here
+          echo "Deployment completed successfully!"
+
