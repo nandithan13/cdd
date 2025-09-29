@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]   # Runs when you push to main branch
+    branches: [ "main" ]  
   pull_request:
-    branches: [ "main" ]   # Runs for PRs to main branch
+    branches: [ "main" ]   
 
 jobs:
   build:
@@ -22,15 +22,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Step 3: Build the project (Maven example)
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      # Step 4: Run tests
       - name: Run tests
         run: mvn test
 
-      # Step 5: Upload artifact
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -40,13 +37,11 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'   # Only deploy from main branch
-
+    if: github.ref == 'refs/heads/main'  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Example deployment to remote server via SSH
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
         with:
