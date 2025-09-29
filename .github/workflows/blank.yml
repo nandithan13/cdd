@@ -1,11 +1,14 @@
 name: Java CI/CD Pipeline (Auto-detect pom.xml)
-
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+  JDK_DISTRO: 'temurin'
 
 jobs:
   build:
@@ -15,41 +18,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Find folder containing pom.xml
-      - name: Locate pom.xml
-        id: findpom
+      # Step 2: Find folder containing pom.xml and set as working directory
+      - name: Locate pom.xml and set working directory
+        id: pomdir
         run: |
+          set -e
           pom_path=$(find . -name "pom.xml" | head -n 1)
-          echo "POM_PATH=$pom_path" >> $GITHUB_ENV
-          echo "Found pom.xml at: $pom_path"
+          pom_dir=$(dirname "$pom_path")
+          echo "pom_dir=$pom_dir" >> $GITHUB_OUTPUT
+          echo "Located pom.xml at: $pom_path"
 
-      # Step 3: Set up JDK 17
-      - name: Set up JDK 17
+      # Step 3: Set up JDK
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JDK_DISTRO }}
 
       # Step 4: Build with Maven
       - name: Build with Maven
         run: mvn -B package
-        working-directory: ${{ env.POM_PATH_DIR }}
-        env:
-          POM_PATH_DIR: ${{ env.POM_PATH }} && dirname ${{ env.POM_PATH }}
+        working-directory: ${{ steps.pomdir.outputs.pom_dir }}
 
       # Step 5: Run tests
       - name: Run tests
         run: mvn test
-        working-directory: ${{ env.POM_PATH_DIR }}
-        env:
-          POM_PATH_DIR: ${{ env.POM_PATH }} && dirname ${{ env.POM_PATH }}
+        working-directory: ${{ steps.pomdir.outputs.pom_dir }}
 
       # Step 6: Upload build artifact
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: ${{ env.POM_PATH_DIR }}/target/*.jar
+          path: ${{ steps.pomdir.outputs.pom_dir }}/target/*.jar
 
   deploy:
     needs: build
